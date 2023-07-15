@@ -2,7 +2,7 @@ import { ButtonHTMLAttributes } from "react";
 
 type ButtonColor = "success" | "error" | "default";
 
-interface ButtonProps {
+interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   width?: string;
   btnColor?: string;
@@ -26,7 +26,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`w-[${width}] bg-[#FE0000] text-white py-4 px-2 rounded font-semibold tracking-wider text-sm`}
+      className={`w-full bg-[#FE0000] text-white py-4 px-2 rounded font-semibold tracking-wider text-sm`}
       {...props}
     >
       {children}

@@ -5,6 +5,7 @@ import { Cells } from "@/components/tic-tac-toe-table";
 import TicTacToeLayout from "@/layout/tic-tac-toe-layout";
 import PlayerCard from "@/components/player-card";
 import Button from "@/components/Button";
+import PlayerOneDetailsModal from "@/components/modal/player-one-details-modal";
 
 export default function NewGameScreen() {
   const [cells, setCells] = useState<Array<Cells>>(
@@ -15,8 +16,27 @@ export default function NewGameScreen() {
   );
 
   const [winningMessage, setWinningMessage] = useState<string>("");
-
   const [symbol, setSymbol] = useState<string>("cross");
+  const [player1, setPlayer1] = useState({
+    playerOneName: "",
+    avatar: "",
+    score: 0,
+  });
+  const [player2, setPlayer2] = useState({
+    playerTwoName: "",
+    avatar: "",
+    score: 0,
+  });
+  const [openPlayer1Modal, setOpenPlayer1Modal] = useState(true);
+  const [openPlayer2Modal, setOpenPlayer2Modal] = useState(false);
+
+  const handlePlayerOneName = (e: any) => {
+    setPlayer1((prev) => ({ ...prev, playerOneName: e.target.value }));
+  };
+
+  const handlePlayerOneAvatar = (link: string) => {
+    setPlayer1((prev) => ({ ...prev, avatar: link }));
+  };
 
   const handleCell = (cellIndex: number) => {
     console.log("got clicked cell #", cellIndex);
@@ -102,10 +122,10 @@ export default function NewGameScreen() {
     <TicTacToeLayout>
       <div className="grid grid-cols-3 gap-1">
         <PlayerCard
-          avatar="https://api.dicebear.com/6.x/adventurer/svg?seed=Socks"
-          playerName="Spongebob Squarepants"
+          avatar={player1.avatar}
+          playerName={player1.playerOneName}
           playerNumber={1}
-          score={1}
+          score={player1.score}
         />
         <div className="w-full">
           <TicTacToeTable
@@ -118,12 +138,26 @@ export default function NewGameScreen() {
           </div>
         </div>
         <PlayerCard
-          playerName="Jimmy Neutron"
+          playerName={player2.playerTwoName}
           playerNumber={2}
-          score={3}
-          avatar="https://api.dicebear.com/6.x/adventurer/svg?seed=Mia"
+          score={player2.score}
+          avatar={player2.avatar}
         />
       </div>
+      <PlayerOneDetailsModal
+        isOpen={openPlayer1Modal}
+        handleCloseModal={() => setOpenPlayer1Modal(false)}
+        handleInput={handlePlayerOneName}
+        handleAvatar={handlePlayerOneAvatar}
+        playerNumber="one"
+      />
+      <PlayerOneDetailsModal
+        isOpen={openPlayer2Modal}
+        handleCloseModal={() => setOpenPlayer2Modal(false)}
+        handleInput={handlePlayerOneName}
+        handleAvatar={handlePlayerOneAvatar}
+        playerNumber="two"
+      />
     </TicTacToeLayout>
   );
 }
