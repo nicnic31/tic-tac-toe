@@ -1,35 +1,53 @@
 import { ButtonHTMLAttributes } from "react";
+import cn from "classnames";
 
 type ButtonColor = "success" | "error" | "default";
+type ButtonShape = "rounded" | "circle";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
   width?: string;
-  btnColor?: string;
+  btnColor?: ButtonColor;
+  btnShape?: ButtonShape;
+  isLoading?: boolean;
 }
 
 const getColor = (type: string) => {
   if (type === "success") {
-    return "#7AA874";
+    return "bg-[#7AA874]";
   } else if (type === "error") {
-    return "#FE0000";
+    return "bg-[#FE0000]";
   } else {
-    return "#30A2FF";
+    return "bg-[#30A2FF]";
   }
 };
 
 export default function Button({
   children,
-  width = "full",
-  btnColor = "#30A2FF",
+  width,
+  btnColor = "default",
+  btnShape = "rounded",
+  isLoading = false,
   ...props
 }: ButtonProps) {
   return (
     <button
-      className={`w-full bg-[#FE0000] text-white py-4 px-2 rounded font-semibold tracking-wider text-sm`}
+      className={cn(
+        "text-sm py-3 cursor-pointer px-2 text-center text-white font-semibold tracking-wider transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300",
+        width ? `w-[${width}]` : "w-full",
+        getColor(btnColor),
+        btnShape === "rounded" ? "rounded" : "rounded-full"
+      )}
+      disabled={isLoading}
       {...props}
     >
-      {children}
+      {isLoading ? (
+        <div className="flex flex-row justify-center">
+          <img src="/assets/loader.gif" className="h-[20px]" />
+        </div>
+      ) : (
+        children
+      )}
     </button>
   );
 }
