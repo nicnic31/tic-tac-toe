@@ -1,13 +1,25 @@
 "use client";
-import TicTacToeTable from "@/components/tic-tac-toe-table";
 import { useState, useEffect } from "react";
 import { Cells } from "@/components/tic-tac-toe-table";
+import { useModal } from "@/components/modal/context";
+
+import TicTacToeTable from "@/components/tic-tac-toe-table";
 import TicTacToeLayout from "@/layout/tic-tac-toe-layout";
 import PlayerCard from "@/components/player-card";
 import Button from "@/components/Button";
-import PlayerOneDetailsModal from "@/components/modal/player-one-details-modal";
+
+type WinningCombinations = Array<Array<number>>;
+
+const disableAllCells = (cells: Array<Cells>) => {
+  cells.forEach((cell) => (cell.isDisabled = true));
+};
+
+const allCellFilledUp = (cells: Array<Cells>) => {
+  return cells.every((cell) => cell.symbol !== "");
+};
 
 export default function NewGameScreen() {
+  const { openModal } = useModal((state) => ({ openModal: state.openModal }));
   const [cells, setCells] = useState<Array<Cells>>(
     Array(9).fill({
       symbol: "",
@@ -15,28 +27,22 @@ export default function NewGameScreen() {
     })
   );
 
-  const [winningMessage, setWinningMessage] = useState<string>("");
+  const [hasWinner, setHasWinner] = useState(false);
   const [symbol, setSymbol] = useState<string>("cross");
   const [player1, setPlayer1] = useState({
     playerOneName: "",
     avatar: "",
-    score: 0,
+    wins: 0,
+    losses: 0,
+    draws: 0,
   });
   const [player2, setPlayer2] = useState({
     playerTwoName: "",
     avatar: "",
-    score: 0,
+    wins: 0,
+    losses: 0,
+    draws: 0,
   });
-  const [openPlayer1Modal, setOpenPlayer1Modal] = useState(true);
-  const [openPlayer2Modal, setOpenPlayer2Modal] = useState(false);
-
-  const handlePlayerOneName = (e: any) => {
-    setPlayer1((prev) => ({ ...prev, playerOneName: e.target.value }));
-  };
-
-  const handlePlayerOneAvatar = (link: string) => {
-    setPlayer1((prev) => ({ ...prev, avatar: link }));
-  };
 
   const handleCell = (cellIndex: number) => {
     console.log("got clicked cell #", cellIndex);
@@ -58,21 +64,64 @@ export default function NewGameScreen() {
     }
   };
 
-  const resetCellsSymbol = () => {
-    setTimeout(() => {
-      setCells(
-        Array(9).fill({
-          symbol: "",
-          isDisabled: false,
-        })
-      );
-      setSymbol("cross");
-      setWinningMessage("");
-    }, 2000);
+  // reset the cell if the players want to continue the game
+  const handleContinueGame = () => {
+    setCells(
+      Array(9).fill({
+        symbol: "",
+        isDisabled: false,
+      })
+    );
+    setSymbol("cross");
+    setHasWinner(false);
   };
 
-  const disableAllCells = () => {
-    cells.forEach((cell) => (cell.isDisabled = true));
+  const handleStopGame = () => {
+
+  }
+
+  // checks if there is circle combinations
+  const checkCircleCombinations = (
+    winningCombinations: WinningCombinations
+  ) => {
+    winningCombinations.forEach((combination) => {
+      const circleWins = combination.every(
+        (number) => cells[number].symbol === "circle"
+      );
+
+      if (circleWins) {
+        openModal("GAME_STATUS", {
+          status: "wins",
+          message: `Congratulations, ${player2.playerTwoName} win this round!`,
+        });
+        setHasWinner(true);
+        setPlayer2((prev) => ({ ...prev, wins: prev.wins + 1 }));
+        setPlayer1((prev) => ({ ...prev, losses: prev.losses + 1 }));
+        disableAllCells(cells);
+        return;
+      }
+    });
+  };
+
+  // checks if there is cross combinations
+  const checkCrossCombinations = (winningCombinations: WinningCombinations) => {
+    winningCombinations.forEach((combination) => {
+      const crossWins = combination.every(
+        (number) => cells[number].symbol === "cross"
+      );
+
+      if (crossWins) {
+        openModal("GAME_STATUS", {
+          status: "wins",
+          message: `Congratulations, ${player1.playerOneName} win this round!`,
+        });
+        setHasWinner(true);
+        setPlayer1((prev) => ({ ...prev, wins: prev.wins + 1 }));
+        setPlayer2((prev) => ({ ...prev, losses: prev.losses + 1 }));
+        disableAllCells(cells);
+        return;
+      }
+    });
   };
 
   const handleCheckWinner = () => {
@@ -87,80 +136,77 @@ export default function NewGameScreen() {
       [6, 7, 8],
     ];
 
-    winningCombinations.forEach((combination) => {
-      const circleWins = combination.every(
-        (number) => cells[number].symbol === "circle"
-      );
-
-      if (circleWins) {
-        setWinningMessage("Circle player wins!");
-        setPlayer2((prev) => ({...prev, score: prev.score + 1}))
-        disableAllCells();
-        resetCellsSymbol();
-        return;
-      }
-    });
-
-    winningCombinations.forEach((combination) => {
-      const crossWins = combination.every(
-        (number) => cells[number].symbol === "cross"
-      );
-
-      if (crossWins) {
-        setWinningMessage("Cross player wins!");
-        setPlayer1((prev) => ({...prev, score: prev.score + 1}))
-        disableAllCells();
-        resetCellsSymbol();
-        return;
-      }
-    });
+    checkCircleCombinations(winningCombinations);
+    checkCrossCombinations(winningCombinations);
   };
 
-  console.log("player 2", player2)
+  // triggers when all the cell is filled up and has no winner
+  const draws = (isCellCompleted: boolean) => {
+    if (isCellCompleted && !hasWinner) {
+      setPlayer1((prev) => ({ ...prev, draws: prev.draws + 1 }));
+      setPlayer2((prev) => ({ ...prev, draws: prev.draws + 1 }));
+      setHasWinner(false);
+      openModal("GAME_STATUS", {
+        status: "draw",
+        message: "No winner in this round.",
+      });
+    }
+  };
+
   useEffect(() => {
     handleCheckWinner();
+    const isCellCompleted = allCellFilledUp(cells);
+    draws(isCellCompleted);
   }, [cells]);
 
   return (
     <TicTacToeLayout>
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-3 gap-1 py-2">
         <PlayerCard
           avatar={player1.avatar}
           playerName={player1.playerOneName}
           playerNumber={1}
-          score={player1.score}
+          wins={player1.wins}
+          losses={player1.losses}
+          draws={player1.draws}
         />
         <div className="w-full">
-          <TicTacToeTable
-            cells={cells}
-            message={winningMessage}
-            handleCell={handleCell}
-          />
-          <div className="text-center">
-            <Button btnColor="error">Stop</Button>
+          <div className="px-[10%]">
+            <TicTacToeTable cells={cells} handleCell={handleCell} />
           </div>
+
+          {(hasWinner || allCellFilledUp(cells)) && (
+            <div className="flex flex-row justify-center mt-8">
+              <div className="w-[50%] mr-2">
+                <Button
+                  btnColor="error"
+                  onClick={() => handleStopGame}
+                >
+                  Stop
+                </Button>
+              </div>
+              <div className="w-[50%] ml-2">
+                <Button
+                  btnColor="success"
+                  onClick={handleContinueGame}
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
-        <PlayerCard
-          playerName={player2.playerTwoName}
-          playerNumber={2}
-          score={player2.score}
-          avatar={player2.avatar}
-        />
+        <div className="flex flex-row justify-end">
+          <PlayerCard
+            playerName={player2.playerTwoName}
+            playerNumber={2}
+            avatar={player2.avatar}
+            wins={player2.wins}
+            losses={player2.losses}
+            draws={player2.draws}
+          />
+        </div>
       </div>
-      <PlayerOneDetailsModal
-        isOpen={openPlayer1Modal}
-        handleCloseModal={() => setOpenPlayer1Modal(false)}
-        handleInput={handlePlayerOneName}
-        handleAvatar={handlePlayerOneAvatar}
-        playerNumber="one"
-      />
-      <PlayerOneDetailsModal
-        isOpen={openPlayer2Modal}
-        handleCloseModal={() => setOpenPlayer2Modal(false)}
-        handleInput={handlePlayerOneName}
-        handleAvatar={handlePlayerOneAvatar}
-        playerNumber="two"
-      />
     </TicTacToeLayout>
   );
 }

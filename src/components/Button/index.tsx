@@ -6,7 +6,7 @@ type ButtonShape = "rounded" | "circle";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: React.ReactNode;
-  width?: string;
+  btnWidth?: string;
   btnColor?: ButtonColor;
   btnShape?: ButtonShape;
   isLoading?: boolean;
@@ -24,8 +24,8 @@ const getColor = (type: string) => {
 
 export default function Button({
   children,
-  width,
-  btnColor = "default",
+  btnWidth,
+  btnColor = 'default',
   btnShape = "rounded",
   isLoading = false,
   ...props
@@ -34,7 +34,7 @@ export default function Button({
     <button
       className={cn(
         "text-sm py-3 cursor-pointer px-2 text-center text-white font-semibold tracking-wider transition ease-in-out delay-150 hover:-translate-y-1 hover:scale-110 duration-300",
-        width ? `w-[${width}]` : "w-full",
+        btnWidth ? `w-[${btnWidth}]` : "w-full",
         getColor(btnColor),
         btnShape === "rounded" ? "rounded" : "rounded-full"
       )}

@@ -1,7 +1,6 @@
 "use client";
 import CircleIcon from "@/components/icons/circle-icon";
 import CrossIcon from "@/components/icons/cross-icon";
-import { useState, useEffect } from "react";
 
 export type Cells = {
   symbol: string;
@@ -10,7 +9,6 @@ export type Cells = {
 
 interface TicTacToeTableProps {
   cells: Array<Cells>;
-  message: string;
   handleCell: (cellIndex: number) => void;
 }
 
@@ -27,7 +25,6 @@ const displaySymbol = (symbol: string) => {
 
 export default function TicTacToeTable({
   cells,
-  message,
   handleCell,
 }: TicTacToeTableProps) {
   return (
@@ -46,7 +43,6 @@ export default function TicTacToeTable({
           </button>
         ))}
       </div>
-      <p className="my-2">{message}</p>
     </div>
   );
 }
