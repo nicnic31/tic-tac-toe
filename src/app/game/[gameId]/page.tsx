@@ -94,6 +94,7 @@ export default function NewGameScreen() {
 
       if (circleWins) {
         setWinningMessage("Circle player wins!");
+        setPlayer2((prev) => ({...prev, score: prev.score + 1}))
         disableAllCells();
         resetCellsSymbol();
         return;
@@ -107,6 +108,7 @@ export default function NewGameScreen() {
 
       if (crossWins) {
         setWinningMessage("Cross player wins!");
+        setPlayer1((prev) => ({...prev, score: prev.score + 1}))
         disableAllCells();
         resetCellsSymbol();
         return;
@@ -114,6 +116,7 @@ export default function NewGameScreen() {
     });
   };
 
+  console.log("player 2", player2)
   useEffect(() => {
     handleCheckWinner();
   }, [cells]);

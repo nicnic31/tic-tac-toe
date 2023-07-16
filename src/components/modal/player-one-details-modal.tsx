@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Dialog } from "@headlessui/react";
-import { avatars } from "../utils/avatars";
+import { avatars } from "../../utils/avatars";
 import Avatar from "@/components/avatar";
 import Button from "@/components/Button";
 
