@@ -65,7 +65,7 @@ export default function PlayersScreen() {
         </div>
       </div>
       <div className="mt-9 text-center">
-        <Button btnColor="success" width="400px" onClick={handleButton}>
+        <Button btnColor="success" btnWidth="400px" onClick={handleButton}>
           Let's get started
         </Button>
       </div>
