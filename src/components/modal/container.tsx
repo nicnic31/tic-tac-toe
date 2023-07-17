@@ -2,11 +2,14 @@ import { Dialog, Transition } from "@headlessui/react";
 import { useModal } from "./context";
 import { Fragment } from "react";
 import GameStatusModal from "./game-status";
+import PlayerExist from "./player-exist";
 
 const renderComponent = (view: string) => {
   switch (view) {
     case "GAME_STATUS":
       return <GameStatusModal />;
+    case "PLAYER_EXIST": 
+      return <PlayerExist />;
     default:
       return null;
   }

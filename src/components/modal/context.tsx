@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type ModalView = "GAME_STATUS" | "DEFAULT";
+type ModalView = "GAME_STATUS" | "PLAYER_EXIST" | "DEFAULT";
 
 interface IModal {
   isOpen: boolean;
