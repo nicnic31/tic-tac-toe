@@ -1,5 +1,6 @@
 import ModalContainer from "@/components/modal/container";
 import Navbar from "@/components/navbar";
+import {Toaster} from 'react-hot-toast';
 
 function TicTacToeLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -7,6 +8,7 @@ function TicTacToeLayout({ children }: { children: React.ReactNode }) {
       <Navbar />
       {children}
       <ModalContainer />
+      <Toaster />
     </div>
   );
 }
