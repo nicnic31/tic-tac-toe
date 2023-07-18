@@ -1,74 +1,154 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { usePlayer } from "@/store/use-players";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { useModal } from "@/components/modal/context";
 import TicTacToeLayout from "@/layout/tic-tac-toe-layout";
 import PlayerInputCard from "@/components/player-input-card";
 import Button from "@/components/Button";
-import { useRouter } from "next/navigation";
 
 export default function PlayersScreen() {
   const router = useRouter();
-  const [player1, setPlayer1] = useState({
-    name: "",
-    avatar: "",
-    score: 0,
-  });
+  const {
+    playerOne,
+    playerOneDisable,
+    playerOneID,
+    playerTwo,
+    playerTwoDisable,
+    playerTwoID,
+    setPlayerOneName,
+    setPlayerOneAvatar,
+    setPlayerOneID,
+    setPlayerTwoName,
+    setPlayerTwoAvatar,
+    setPlayerTwoID,
+  } = usePlayer((state) => ({
+    playerOne: state.playerOne,
+    playerOneDisable: state.playerOneDisable,
+    playerOneID: state.playerOneID,
+    playerTwo: state.playerTwo,
+    playerTwoDisable: state.playerTwoDisable,
+    playerTwoID: state.playerTwoID,
+    setPlayerOneName: state.setPlayerOneName,
+    setPlayerOneAvatar: state.setPlayerOneAvatar,
+    setPlayerOneID: state.setPlayerOneID,
+    setPlayerTwoName: state.setPlayerTwoName,
+    setPlayerTwoAvatar: state.setPlayerTwoAvatar,
+    setPlayerTwoID: state.setPlayerTwoID,
+  }));
 
-  const [player2, setPlayer2] = useState({
-    name: "",
-    avatar: "",
-    score: 0,
-  });
+  const { openModal } = useModal((state) => ({ openModal: state.openModal }));
 
   const handlePlayer1Name = (name: string) => {
-    setPlayer1((prev) => ({ ...prev, name }));
-  };
-
-  const handlePlayer2Name = (name: string) => {
-    setPlayer2((prev) => ({ ...prev, name }));
+    setPlayerOneName(name);
   };
 
   const handlePlayer1Avatar = (avatar: string) => {
-    setPlayer1((prev) => ({ ...prev, avatar }));
+    setPlayerOneAvatar(avatar);
+  };
+
+  const handlePlayer2Name = (name: string) => {
+    setPlayerTwoName(name);
   };
 
   const handlePlayer2Avatar = (avatar: string) => {
-    setPlayer2((prev) => ({ ...prev, avatar }));
+    setPlayerTwoAvatar(avatar);
   };
 
-  const handleButton = () => {
-    if(player1.name !== '' && player1.avatar !== '' && player2.name !== '' && player2.avatar !== ''){
-        router.push(`/game/${1}`);
-    } else {
-        alert('Please complete the form');
+  const handlePlayer1Details = async () => {
+    try {
+      if (
+        playerOne.name !== "" &&
+        playerOne.avatar !== "" &&
+        playerOne.name !== playerTwo.name
+      ) {
+        const result = await axios.post(
+          "http://localhost:3001/players/create",
+          {
+            name: playerOne.name.toLowerCase(),
+            avatar: playerOne.avatar,
+          }
+        );
+        setPlayerOneID(result.data.id);
+        toast.success("Successfully created player one!");
+      } else {
+        toast.error("Complete player one information");
+      }
+    } catch (e: any) {
+      setPlayerOneID(e.response.data.id);
+      toast.error(e.response.data.message);
+      openModal("PLAYER_EXIST", { name: playerOne.name, playerNumber: 1 });
     }
-  }
+  };
+
+  const handlePlayer2Details = async () => {
+    try {
+      if (
+        playerTwo.name !== "" &&
+        playerTwo.avatar !== "" &&
+        playerOne.name !== playerTwo.name
+      ) {
+        const result = await axios.post(
+          "http://localhost:3001/players/create",
+          {
+            name: playerTwo.name.toLowerCase(),
+            avatar: playerTwo.avatar,
+          }
+        );
+        setPlayerTwoID(result.data.id);
+        toast.success("Successfully created player two!");
+      } else {
+        toast.error("Complete player two information");
+      }
+    } catch (e: any) {
+      setPlayerTwoID(e.response.data.id);
+      toast.error(e.response.data.message);
+      openModal("PLAYER_EXIST", { name: playerTwo.name, playerNumber: 2 });
+    }
+  };
+
+  console.log("playerOneID", playerOneID);
+  console.log("playerTwoID", playerTwoID);
 
   return (
     <TicTacToeLayout>
       <div className="grid grid-cols-2 py-3">
         <div className="flex flex-row justify-center">
           <PlayerInputCard
+            name={playerOne.name}
             placeholder="Enter your name, player one"
-            selectedAvatar={player1.avatar}
+            selectedAvatar={playerOne.avatar}
+            isDisable={playerOneDisable}
             handlePlayerName={handlePlayer1Name}
             handleAvatar={handlePlayer1Avatar}
+            handleSubmit={handlePlayer1Details}
           />
         </div>
         <div className="flex flex-row justify-center">
           <PlayerInputCard
+            name={playerTwo.name}
             placeholder="Enter your name, player two"
-            selectedAvatar={player2.avatar}
+            selectedAvatar={playerTwo.avatar}
+            isDisable={playerTwoDisable}
             handlePlayerName={handlePlayer2Name}
             handleAvatar={handlePlayer2Avatar}
+            handleSubmit={handlePlayer2Details}
           />
         </div>
       </div>
-      <div className="mt-9 text-center">
-        <Button btnColor="success" width="400px" onClick={handleButton}>
-          Let's get started
-        </Button>
-      </div>
+      {playerOneID !== "" && playerTwoID !== "" && (
+        <div className="mt-9 text-center">
+          <Button
+            btnColor="success"
+            btnWidth="400px"
+            onClick={() => router.push("/game")}
+          >
+            Start
+          </Button>
+        </div>
+      )}
     </TicTacToeLayout>
   );
 }
