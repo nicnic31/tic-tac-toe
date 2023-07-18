@@ -1,46 +1,42 @@
 "use client";
 
-import TicTacToeLayout from "@/layout/tic-tac-toe-layout";
-import PlayerInputCard from "@/components/player-input-card";
-import Button from "@/components/Button";
 import { useRouter } from "next/navigation";
 import { usePlayer } from "@/store/use-players";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useModal } from "@/components/modal/context";
+import TicTacToeLayout from "@/layout/tic-tac-toe-layout";
+import PlayerInputCard from "@/components/player-input-card";
+import Button from "@/components/Button";
 
 export default function PlayersScreen() {
   const router = useRouter();
   const {
-    playerOneName,
-    playerOneAvatar,
+    playerOne,
     playerOneDisable,
     playerOneID,
-    playerTwoName,
-    playerTwoAvatar,
-    playerTwoID,
+    playerTwo,
     playerTwoDisable,
+    playerTwoID,
     setPlayerOneName,
     setPlayerOneAvatar,
-    setPlayerOne,
+    setPlayerOneID,
     setPlayerTwoName,
     setPlayerTwoAvatar,
-    setPlayerTwo,
+    setPlayerTwoID,
   } = usePlayer((state) => ({
-    playerOneName: state.playerOneName,
-    playerOneAvatar: state.playerOneAvatar,
+    playerOne: state.playerOne,
     playerOneDisable: state.playerOneDisable,
     playerOneID: state.playerOneID,
-    playerTwoName: state.playerTwoName,
-    playerTwoAvatar: state.playerTwoAvatar,
+    playerTwo: state.playerTwo,
     playerTwoDisable: state.playerTwoDisable,
     playerTwoID: state.playerTwoID,
     setPlayerOneName: state.setPlayerOneName,
     setPlayerOneAvatar: state.setPlayerOneAvatar,
-    setPlayerOne: state.setPlayerOne,
+    setPlayerOneID: state.setPlayerOneID,
     setPlayerTwoName: state.setPlayerTwoName,
     setPlayerTwoAvatar: state.setPlayerTwoAvatar,
-    setPlayerTwo: state.setPlayerTwo,
+    setPlayerTwoID: state.setPlayerTwoID,
   }));
 
   const { openModal } = useModal((state) => ({ openModal: state.openModal }));
@@ -64,61 +60,66 @@ export default function PlayersScreen() {
   const handlePlayer1Details = async () => {
     try {
       if (
-        playerOneName !== "" &&
-        playerOneAvatar !== "" &&
-        playerOneName !== playerTwoName
+        playerOne.name !== "" &&
+        playerOne.avatar !== "" &&
+        playerOne.name !== playerTwo.name
       ) {
         const result = await axios.post(
           "http://localhost:3001/players/create",
           {
-            name: playerOneName.toLowerCase(),
-            avatar: playerOneAvatar,
+            name: playerOne.name.toLowerCase(),
+            avatar: playerOne.avatar,
           }
         );
-        setPlayerOne(result.data.id);
+        setPlayerOneID(result.data.id);
         toast.success("Successfully created player one!");
       } else {
         toast.error("Complete player one information");
       }
     } catch (e: any) {
+      setPlayerOneID(e.response.data.id);
       toast.error(e.response.data.message);
-      openModal("PLAYER_EXIST", { name: playerOneName, playerNumber: 1 });
+      openModal("PLAYER_EXIST", { name: playerOne.name, playerNumber: 1 });
     }
   };
 
   const handlePlayer2Details = async () => {
     try {
       if (
-        playerTwoName !== "" &&
-        playerTwoAvatar !== "" &&
-        playerOneName !== playerTwoName
+        playerTwo.name !== "" &&
+        playerTwo.avatar !== "" &&
+        playerOne.name !== playerTwo.name
       ) {
         const result = await axios.post(
           "http://localhost:3001/players/create",
           {
-            name: playerTwoName.toLowerCase(),
-            avatar: playerTwoAvatar,
+            name: playerTwo.name.toLowerCase(),
+            avatar: playerTwo.avatar,
           }
         );
-        setPlayerTwo(result.data.id);
+        setPlayerTwoID(result.data.id);
         toast.success("Successfully created player two!");
       } else {
         toast.error("Complete player two information");
       }
     } catch (e: any) {
+      setPlayerTwoID(e.response.data.id);
       toast.error(e.response.data.message);
-      openModal("PLAYER_EXIST", { name: playerTwoName, playerNumber: 2 });
+      openModal("PLAYER_EXIST", { name: playerTwo.name, playerNumber: 2 });
     }
   };
+
+  console.log("playerOneID", playerOneID);
+  console.log("playerTwoID", playerTwoID);
 
   return (
     <TicTacToeLayout>
       <div className="grid grid-cols-2 py-3">
         <div className="flex flex-row justify-center">
           <PlayerInputCard
-            name={playerOneName}
+            name={playerOne.name}
             placeholder="Enter your name, player one"
-            selectedAvatar={playerOneAvatar}
+            selectedAvatar={playerOne.avatar}
             isDisable={playerOneDisable}
             handlePlayerName={handlePlayer1Name}
             handleAvatar={handlePlayer1Avatar}
@@ -127,9 +128,9 @@ export default function PlayersScreen() {
         </div>
         <div className="flex flex-row justify-center">
           <PlayerInputCard
-            name={playerTwoName}
+            name={playerTwo.name}
             placeholder="Enter your name, player two"
-            selectedAvatar={playerTwoAvatar}
+            selectedAvatar={playerTwo.avatar}
             isDisable={playerTwoDisable}
             handlePlayerName={handlePlayer2Name}
             handleAvatar={handlePlayer2Avatar}
